@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pgp — paste.lucafchala.com</title>
+    <meta name="theme-color" content="#0d0c0a">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>(function(){document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'})();</script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --bg: #0d0c0a; --border: #252220; --text: #e6e1d6; --muted: #6a6358; --accent: #c08030; --accent-dim: #6a4818; --ctrl-bg: #161412; }
+        [data-theme="light"] { --bg: #f4efe6; --border: #d8d1c4; --text: #1c1a17; --muted: #9a8f80; --accent: #a06820; --accent-dim: #c89050; --ctrl-bg: #ede8df; }
+        html { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; -webkit-font-smoothing: antialiased; transition: background 0.25s, color 0.25s; }
+        body { min-height: 100vh; max-width: 680px; margin: 0 auto; padding: 48px 32px 72px; }
+        body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); opacity: 0.28; }
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .back { color: var(--muted); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; transition: color 0.15s; }
+        .back:hover { color: var(--accent); }
+        .controls-inner { display: flex; align-items: center; gap: 4px; background: var(--ctrl-bg); border: 1px solid var(--border); border-radius: 3px; padding: 4px 6px; }
+        .ctrl-btn { background: none; border: none; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; padding: 4px 7px; cursor: pointer; transition: color 0.15s; border-radius: 2px; line-height: 1; }
+        .ctrl-btn:hover { color: var(--accent); }
+        #btn-theme { font-size: 15px; padding: 2px 7px; }
+        header { margin-bottom: 40px; animation: rise 0.9s cubic-bezier(0.16,1,0.3,1) both; }
+        .slug { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 8vw, 56px); font-weight: 300; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 12px; color: var(--accent); }
+        .micro { color: var(--muted); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+        .rule { display: flex; align-items: center; gap: 16px; margin: 32px 0; color: var(--muted); font-size: 10px; letter-spacing: 0.1em; }
+        .rule::before, .rule::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .content { animation: rise 0.9s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+        .meta { margin-bottom: 20px; }
+        .meta-row { display: flex; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+        .meta-label { color: var(--muted); width: 90px; flex-shrink: 0; }
+        .meta-val { color: var(--text); font-family: 'JetBrains Mono', monospace; word-break: break-all; }
+        .key-block {
+            background: var(--ctrl-bg); border: 1px solid var(--border);
+            border-radius: 3px; padding: 16px; margin-top: 20px;
+            font-size: 11px; line-height: 1.6; color: var(--muted);
+            white-space: pre-wrap; word-break: break-all;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .copy-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: none; border: 1px solid var(--border);
+            border-radius: 3px; color: var(--muted);
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            letter-spacing: 0.09em; text-transform: uppercase;
+            padding: 6px 14px; cursor: pointer; margin-top: 14px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .copy-btn:hover { color: var(--text); border-color: var(--accent-dim); }
+        .copy-btn.ok { color: var(--accent); border-color: var(--accent-dim); }
+        @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 540px) { body { padding: 32px 22px 52px; } }
+    </style>
+</head>
+
+<body>
+
+    <div class="controls">
+        <a href="/" class="back">← pastes</a>
+        <div class="controls-inner">
+            <button class="ctrl-btn" id="btn-theme" onclick="toggleTheme()">◐</button>
+        </div>
+    </div>
+
+    <header>
+        <h1 class="slug">pgp</h1>
+        <p class="micro">paste.lucafchala.com</p>
+    </header>
+
+    <div class="rule">PUBLIC KEY</div>
+
+    <div class="content">
+        <div class="meta">
+            <div class="meta-row">
+                <span class="meta-label">fingerprint</span>
+                <span class="meta-val">48E7 3F6F A287 1E7B 86EF  EA64 8EC4 329A 369B 7B33</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">uid</span>
+                <span class="meta-val">Luca F. Chala &lt;luca@lucafchala.com&gt;</span>
+            </div>
+            <div class="meta-row" style="border-bottom:none">
+                <span class="meta-label">algorithm</span>
+                <span class="meta-val">Ed25519</span>
+            </div>
+        </div>
+
+        <pre id="key-block" class="key-block">-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+[ Add your PGP public key here — replace this placeholder with the output of:
+  gpg --armor --export luca@lucafchala.com ]
+
+-----END PGP PUBLIC KEY BLOCK-----</pre>
+
+        <button class="copy-btn" id="copy-btn" onclick="copyKey()">copy key</button>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.dataset.theme = next;
+            localStorage.setItem('theme', next);
+        }
+
+        function copyKey() {
+            const key = document.getElementById('key-block').textContent;
+            const btn = document.getElementById('copy-btn');
+            navigator.clipboard.writeText(key).then(() => {
+                btn.textContent = 'copied!';
+                btn.classList.add('ok');
+                setTimeout(() => { btn.textContent = 'copy key'; btn.classList.remove('ok'); }, 2000);
+            }).catch(() => {});
+        }
+    </script>
+
+</body>
+</html>
