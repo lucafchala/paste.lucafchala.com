@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark" data-lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paste — lucafchala</title>
+    <meta name="description" content="Pastes e snippets — lucafchala.com">
+    <meta name="theme-color" content="#0d0c0a">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>(function(){document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'})();</script>
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:         #0d0c0a;
+            --border:     #252220;
+            --text:       #e6e1d6;
+            --muted:      #6a6358;
+            --accent:     #c08030;
+            --accent-dim: #6a4818;
+            --ctrl-bg:    #161412;
+        }
+        [data-theme="light"] {
+            --bg:         #f4efe6;
+            --border:     #d8d1c4;
+            --text:       #1c1a17;
+            --muted:      #9a8f80;
+            --accent:     #a06820;
+            --accent-dim: #c89050;
+            --ctrl-bg:    #ede8df;
+        }
+
+        html {
+            background: var(--bg); color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px; line-height: 1.75;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.25s, color 0.25s;
+        }
+        body {
+            min-height: 100vh; max-width: 680px;
+            margin: 0 auto; padding: 48px 32px 72px;
+        }
+        body::after {
+            content: ''; position: fixed; inset: 0;
+            pointer-events: none; z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+            opacity: 0.28;
+        }
+
+        .controls { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+        .controls-inner {
+            display: flex; align-items: center; gap: 4px;
+            background: var(--ctrl-bg); border: 1px solid var(--border);
+            border-radius: 3px; padding: 4px 6px;
+            transition: background 0.25s, border-color 0.25s;
+        }
+        .ctrl-btn {
+            background: none; border: none; color: var(--muted);
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            font-weight: 400; letter-spacing: 0.09em; text-transform: uppercase;
+            padding: 4px 7px; cursor: pointer; transition: color 0.15s;
+            border-radius: 2px; line-height: 1;
+        }
+        .ctrl-btn:hover { color: var(--accent); }
+        .ctrl-btn.active { color: var(--text); }
+        #btn-theme { font-size: 15px; padding: 2px 7px; }
+        .ctrl-sep { color: var(--border); font-size: 10px; user-select: none; line-height: 1; }
+
+        header { margin-bottom: 52px; animation: rise 0.9s cubic-bezier(0.16,1,0.3,1) both; }
+        .name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(48px, 10vw, 72px);
+            font-weight: 300; line-height: 0.92;
+            letter-spacing: -0.025em; margin-bottom: 18px;
+        }
+        .name em { font-style: italic; color: var(--accent); }
+        .micro { color: var(--muted); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+
+        .rule {
+            display: flex; align-items: center; gap: 16px;
+            margin: 36px 0; color: var(--muted); font-size: 10px; letter-spacing: 0.1em;
+        }
+        .rule::before, .rule::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .paste-list {
+            display: flex; flex-direction: column; gap: 0;
+            animation: rise 0.9s cubic-bezier(0.16,1,0.3,1) 0.12s both;
+        }
+        .paste-item {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px; padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            transition: padding-left 0.15s;
+        }
+        .paste-item:first-child { border-top: 1px solid var(--border); }
+        .paste-item:hover { padding-left: 6px; }
+
+        .paste-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+        .paste-slug {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px; font-weight: 400;
+            color: var(--text); line-height: 1.1;
+        }
+        .paste-desc { font-size: 11px; color: var(--muted); }
+        .paste-arrow { color: var(--accent-dim); font-size: 18px; flex-shrink: 0; transition: color 0.15s, transform 0.15s; }
+        .paste-item:hover .paste-arrow { color: var(--accent); transform: translate(3px, -2px); }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 540px) { body { padding: 32px 22px 52px; } }
+    </style>
+</head>
+
+<body>
+
+    <div class="controls">
+        <div class="controls-inner">
+            <button class="ctrl-btn active" id="btn-pt" onclick="setLang('pt')">PT</button>
+            <span class="ctrl-sep">|</span>
+            <button class="ctrl-btn" id="btn-en" onclick="setLang('en')">EN</button>
+            <span class="ctrl-sep">·</span>
+            <button class="ctrl-btn" id="btn-theme" onclick="toggleTheme()" title="Toggle theme">◐</button>
+        </div>
+    </div>
+
+    <header>
+        <h1 class="name" id="h1-title">Paste</h1>
+        <p class="micro" id="micro-sub">lucafchala.com</p>
+    </header>
+
+    <div class="rule" id="rule-text">PASTES</div>
+
+    <nav class="paste-list" id="paste-list"></nav>
+
+    <script>
+        const STRINGS = {
+            pt: {
+                h1: 'Paste',
+                micro: 'lucafchala.com',
+                rule: 'PASTES',
+                pastes: [
+                    { slug: 'a-mascara',                                   desc: 'Projeto de vídeo escolar — A Máscara' },
+                    { slug: 'nirvana-e-a-cultura-do-ultrarromantismo',      desc: 'Projeto de vídeo escolar — Nirvana' },
+                    { slug: 'vela_f5-2024',                                 desc: 'Projeto de vídeo escolar — Vela F5' },
+                    { slug: 'camera-gear',                                  desc: 'Lista de equipamentos fotográficos' },
+                    { slug: 'e-mail-me',                                    desc: 'Contato por e-mail' },
+                    { slug: 'pgp',                                          desc: 'Chave PGP pública' },
+                ],
+            },
+            en: {
+                h1: 'Paste',
+                micro: 'lucafchala.com',
+                rule: 'PASTES',
+                pastes: [
+                    { slug: 'a-mascara',                                   desc: 'School video project — A Máscara' },
+                    { slug: 'nirvana-e-a-cultura-do-ultrarromantismo',      desc: 'School video project — Nirvana' },
+                    { slug: 'vela_f5-2024',                                 desc: 'School video project — Vela F5' },
+                    { slug: 'camera-gear',                                  desc: 'Photography gear list' },
+                    { slug: 'e-mail-me',                                    desc: 'Contact by e-mail' },
+                    { slug: 'pgp',                                          desc: 'Public PGP key' },
+                ],
+            }
+        };
+
+        let lang = localStorage.getItem('lang') || 'pt';
+        const s = () => STRINGS[lang];
+
+        function applyLang(l) {
+            lang = l;
+            document.documentElement.lang = l === 'pt' ? 'pt-BR' : 'en';
+            document.documentElement.dataset.lang = l;
+            localStorage.setItem('lang', l);
+            document.getElementById('h1-title').textContent = s().h1;
+            document.getElementById('micro-sub').textContent = s().micro;
+            document.getElementById('rule-text').textContent = s().rule;
+            document.getElementById('btn-pt').classList.toggle('active', l === 'pt');
+            document.getElementById('btn-en').classList.toggle('active', l === 'en');
+            document.getElementById('paste-list').innerHTML = s().pastes.map(p => `
+                <a href="/${p.slug}" class="paste-item">
+                    <div class="paste-body">
+                        <span class="paste-slug">${p.slug}</span>
+                        <span class="paste-desc">${p.desc}</span>
+                    </div>
+                    <span class="paste-arrow">↗</span>
+                </a>`).join('');
+        }
+
+        function setLang(l) { applyLang(l); }
+        function toggleTheme() {
+            const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.dataset.theme = next;
+            localStorage.setItem('theme', next);
+        }
+
+        applyLang(lang);
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+        }
+    </script>
+
+</body>
+</html>

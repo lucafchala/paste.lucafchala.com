@@ -1,0 +1,5 @@
+# paste.lucafchala.com — Cloudflare Pages _redirects
+# Directory structure handles most routes natively (each paste is a folder)
+# This file handles any edge cases
+
+/a-máscara   /a-mascara   301
