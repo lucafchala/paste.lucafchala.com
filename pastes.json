@@ -1,0 +1,54 @@
+{
+  "pastes": [
+    {
+      "slug": "a-mascara",
+      "subtitle": "PROJETO DE VÍDEO",
+      "description": "Projeto de vídeo escolar — A Máscara",
+      "description_en": "School video project — A Máscara",
+      "lang": "pt",
+      "content": "NÃO REPRODUZIR DIRETO DO DRIVE — reproduzir o arquivo localmente.\n\nDownload (conta @santacruz.g12.br):\nhttps://lucafchala.com/a-mascara_download-csa\n\nDownload (outras contas):\nhttps://lucafchala.com/a-mascara_download\n\nYouTube:\nhttps://lucafchala.com/a-mascara_yt"
+    },
+    {
+      "slug": "nirvana-e-a-cultura-do-ultrarromantismo",
+      "subtitle": "PROJETO DE VÍDEO",
+      "description": "Projeto de vídeo escolar — Nirvana",
+      "description_en": "School video project — Nirvana",
+      "lang": "pt",
+      "content": "NÃO REPRODUZIR DIRETO DO DRIVE — reproduzir o arquivo localmente.\n\nDownload (conta @santacruz.g12.br):\nhttps://lucafchala.com/nirvana-e-a-cultura-do-ultrarromantismo_download-csa\n\nDownload (outras contas):\nhttps://lucafchala.com/nirvana-e-a-cultura-do-ultrarromantismo_download\n\nYouTube:\nhttps://lucafchala.com/nirvana-e-a-cultura-do-ultrarromantismo_yt"
+    },
+    {
+      "slug": "vela_f5-2024",
+      "subtitle": "PROJETO DE VÍDEO",
+      "description": "Projeto de vídeo escolar — Vela F5",
+      "description_en": "School video project — Vela F5",
+      "lang": "pt",
+      "content": "NÃO REPRODUZIR DIRETO DO DRIVE (problema no áudio) — reproduzir o arquivo localmente.\n\nDownload (conta @santacruz.g12.br):\nhttps://lucafchala.com/vela_f5-download_csa\n\nDownload (outras contas):\nhttps://lucafchala.com/vela_f5-download\n\nYouTube:\nhttps://lucafchala.com/vela_f5-youtube\n\nIntegrantes:\n- Luca F. Chala\n- Fernando Guedes"
+    },
+    {
+      "slug": "camera-gear",
+      "subtitle": "PHOTOGRAPHY GEAR",
+      "description": "Lista de equipamentos fotográficos",
+      "description_en": "Photography gear list",
+      "lang": "en",
+      "content": "Essentials\n\nCameras:\n- Sony A6700 (kit)\n\nLenses:\n- Sigma 24-70 f2.8 DG DN II ART\n\nMemory cards:\n- SanDisk 128GB Extreme PRO UHS-I SDXC (with A6700 kit)\n- SanDisk 128GB Extreme PRO UHS-II SDXC (maximum video quality)\n- Lexar 256GB Professional 1667x UHS-II SDXC (main photography drive)\n\nTripods:\n- Ulanzi & Coman Zero Y tripod\n\nFlashes:\n- Godox V1 PRO\n\nChargers:\n- Jupio tri-charge for Sony NP-FZ100 (also card holder)\n\nBatteries:\n- Sony NP-FZ100 (3x)\n- Godox VB-30 (1x)\n\n\nAccessories\n\nLens filters:\n- PolarPro 82mm QuartzLine Circular Polarizer\n- Hoya UV-HMC 82mm\n\nSupport:\n- Peak Design Slide Camera Strap\n- Peak Design Capture Clip v3\n- Peak Design Cuff Camera Wrist\n- Sony Strap\n\n\nMiscellaneous\n\nBackpacks:\n- K&F Concept Beta Photography Backpack 20L\n- Ruggard Hunter 35 DSLR Holster (with A6700 kit)\n- AK-R1 flash kit"
+    },
+    {
+      "slug": "e-mail-me",
+      "subtitle": "CONTACT",
+      "description": "Contato por e-mail",
+      "description_en": "Contact by e-mail",
+      "lang": "en",
+      "content": "You can contact me via any of the addresses below — they all redirect to the same inbox.\n\nluca@lucafchala.com\ntucas@fastmail.com\nlfchala4@gmail.com\n\nFeel free to use my PGP key: https://paste.lucafchala.com/pgp"
+    },
+    {
+      "slug": "pgp",
+      "subtitle": "PUBLIC KEY",
+      "description": "Chave PGP pública",
+      "description_en": "Public PGP key",
+      "lang": "en",
+      "type": "pgp",
+      "fingerprint": "48E7 3F6F A287 1E7B 86EF  EA64 8EC4 329A 369B 7B33",
+      "content": "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\n[ Paste your PGP public key here.\n  Run: gpg --armor --export luca@lucafchala.com ]\n\n-----END PGP PUBLIC KEY BLOCK-----"
+    }
+  ]
+}

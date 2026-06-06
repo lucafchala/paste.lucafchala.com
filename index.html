@@ -143,56 +143,37 @@
     <nav class="paste-list" id="paste-list"></nav>
 
     <script>
-        const STRINGS = {
-            pt: {
-                h1: 'Paste',
-                micro: 'lucafchala.com',
-                rule: 'PASTES',
-                pastes: [
-                    { slug: 'a-mascara',                                   desc: 'Projeto de vídeo escolar — A Máscara' },
-                    { slug: 'nirvana-e-a-cultura-do-ultrarromantismo',      desc: 'Projeto de vídeo escolar — Nirvana' },
-                    { slug: 'vela_f5-2024',                                 desc: 'Projeto de vídeo escolar — Vela F5' },
-                    { slug: 'camera-gear',                                  desc: 'Lista de equipamentos fotográficos' },
-                    { slug: 'e-mail-me',                                    desc: 'Contato por e-mail' },
-                    { slug: 'pgp',                                          desc: 'Chave PGP pública' },
-                ],
-            },
-            en: {
-                h1: 'Paste',
-                micro: 'lucafchala.com',
-                rule: 'PASTES',
-                pastes: [
-                    { slug: 'a-mascara',                                   desc: 'School video project — A Máscara' },
-                    { slug: 'nirvana-e-a-cultura-do-ultrarromantismo',      desc: 'School video project — Nirvana' },
-                    { slug: 'vela_f5-2024',                                 desc: 'School video project — Vela F5' },
-                    { slug: 'camera-gear',                                  desc: 'Photography gear list' },
-                    { slug: 'e-mail-me',                                    desc: 'Contact by e-mail' },
-                    { slug: 'pgp',                                          desc: 'Public PGP key' },
-                ],
-            }
-        };
-
         let lang = localStorage.getItem('lang') || 'pt';
-        const s = () => STRINGS[lang];
+        let allPastes = [];
+
+        function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        function renderList() {
+            const list = document.getElementById('paste-list');
+            if (!allPastes.length) {
+                list.innerHTML = '<p style="color:var(--muted);font-size:12px;padding:16px 0">carregando…</p>';
+                return;
+            }
+            list.innerHTML = allPastes.map(p => {
+                const desc = (lang === 'en' && p.description_en) ? p.description_en : (p.description || '');
+                return `<a href="/${esc(p.slug)}" class="paste-item">
+                    <div class="paste-body">
+                        <span class="paste-slug">${esc(p.slug)}</span>
+                        ${desc ? `<span class="paste-desc">${esc(desc)}</span>` : ''}
+                    </div>
+                    <span class="paste-arrow">↗</span>
+                </a>`;
+            }).join('');
+        }
 
         function applyLang(l) {
             lang = l;
             document.documentElement.lang = l === 'pt' ? 'pt-BR' : 'en';
             document.documentElement.dataset.lang = l;
             localStorage.setItem('lang', l);
-            document.getElementById('h1-title').textContent = s().h1;
-            document.getElementById('micro-sub').textContent = s().micro;
-            document.getElementById('rule-text').textContent = s().rule;
             document.getElementById('btn-pt').classList.toggle('active', l === 'pt');
             document.getElementById('btn-en').classList.toggle('active', l === 'en');
-            document.getElementById('paste-list').innerHTML = s().pastes.map(p => `
-                <a href="/${p.slug}" class="paste-item">
-                    <div class="paste-body">
-                        <span class="paste-slug">${p.slug}</span>
-                        <span class="paste-desc">${p.desc}</span>
-                    </div>
-                    <span class="paste-arrow">↗</span>
-                </a>`).join('');
+            renderList();
         }
 
         function setLang(l) { applyLang(l); }
@@ -203,6 +184,17 @@
         }
 
         applyLang(lang);
+
+        fetch('/pastes.json')
+            .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+            .then(data => {
+                allPastes = data.pastes || [];
+                renderList();
+            })
+            .catch(() => {
+                document.getElementById('paste-list').innerHTML =
+                    '<p style="color:var(--muted);font-size:12px;padding:16px 0">Erro ao carregar pastes.</p>';
+            });
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
