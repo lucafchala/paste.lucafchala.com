@@ -49,6 +49,13 @@
       "type": "pgp",
       "fingerprint": "48E7 3F6F A287 1E7B 86EF  EA64 8EC4 329A 369B 7B33",
       "content": "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\n[ Paste your PGP public key here.\n  Run: gpg --armor --export luca@lucafchala.com ]\n\n-----END PGP PUBLIC KEY BLOCK-----"
+    },
+    {
+      "slug": "teste",
+      "subtitle": "testess",
+      "description": "testes",
+      "description_en": "asas",
+      "content": "asasdasdasd "
     }
   ]
 }
