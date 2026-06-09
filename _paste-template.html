@@ -118,10 +118,11 @@
 
         function renderText(paste) {
             const raw = paste.content || '';
-            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            const linked = esc(raw).replace(/(https?:\/\/[^\s<&]+)/g,
-                url => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="paste-link">${url}</a>`
-            );
+            const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+            const linked = esc(raw).replace(/(https?:\/\/[^\s<&]+)/g, url => {
+                try { if (!/^https?:$/.test(new URL(url).protocol)) return url; } catch { return url; }
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="paste-link">${url}</a>`;
+            });
             document.getElementById('paste-content').innerHTML = `<pre class="paste-pre">${linked}</pre>`;
         }
 
