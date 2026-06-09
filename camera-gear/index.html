@@ -127,7 +127,7 @@
         }
 
         function renderPgp(paste) {
-            const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
             document.getElementById('paste-content').innerHTML = `
                 <div class="meta">
                     <div class="meta-row"><span class="meta-label">fingerprint</span><span class="meta-val">${esc(paste.fingerprint||'')}</span></div>
