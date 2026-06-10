@@ -1,4 +1,4 @@
-const CACHE = 'paste-v2';
+const CACHE = 'paste-v3';
 const PRECACHE = ['/', '/index.html', '/icon.svg'];
 
 function normalizeUrl(url) {

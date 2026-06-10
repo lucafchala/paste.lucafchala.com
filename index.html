@@ -146,7 +146,7 @@
         let lang = localStorage.getItem('lang') || 'pt';
         let allPastes = [];
 
-        function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
 
         function renderList() {
             const list = document.getElementById('paste-list');
