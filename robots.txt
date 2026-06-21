@@ -1,0 +1,8 @@
+# robots.txt — paste.lucafchala.com
+# Open access: public pastes and content. All crawlers and AI agents are welcome.
+
+User-agent: *
+Allow: /
+
+/pastes.json
+  Allow: /
