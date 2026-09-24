@@ -1,32 +1,42 @@
 # paste.lucafchala.com
 
-> A minimal, static pastebin for the `lucafchala.com` network — short text snippets and a published PGP key, each at its own clean URL, with no database and no backend.
+> A minimal, static pastebin for the `lucafchala.com` network: short texts, snippets and the published PGP key, each at its own clean URL, with no database and no backend.
 
 **Live:** [paste.lucafchala.com](https://paste.lucafchala.com) · **Stack:** static HTML/CSS/JS on Cloudflare Pages · **Build step:** none
 
-Part of the [lucafchala.com ecosystem](https://github.com/lucafchala/lucafchala.com#the-ecosystem). Shared design system and conventions live in the [hub README](https://github.com/lucafchala/lucafchala.com#readme).
+Part of the [lucafchala.com ecosystem](https://github.com/lucafchala/lucafchala.com#the-ecosystem). Shared design system and conventions: [hub README](https://github.com/lucafchala/lucafchala.com#design-system).
 
 ---
 
 ## What it is
 
-**One sentence:** `paste.lucafchala.com` is a static pastebin where every paste is described once in `pastes.json` and rendered client‑side, with the index page listing all pastes and each `/<slug>` page fetching the same JSON to display one of them.
+Every paste is described once in `pastes.json` and lives at `paste.lucafchala.com/<slug>/`. Pastes are created and edited in the [`dash`](https://github.com/lucafchala/dash.lucafchala.com) control panel, which commits:
+- the updated `pastes.json`;
+- a generated page per paste;
+- `sitemap.xml`.
 
-**In a paragraph:** It's a deliberately tiny pastebin: there is no editor, no auth, and no server. A single `pastes.json` holds every paste's content and metadata. The homepage (`index.html`) fetches that file and renders a bilingual list; each paste lives at `paste.lucafchala.com/<slug>/`, served by a per‑slug `index.html` that is a copy of the same template and resolves *which* paste to show from `location.pathname`. Pastes are created and edited from the [`dash`](https://github.com/lucafchala/dash.lucafchala.com) control panel, which commits an updated `pastes.json` and — for new pastes — a new `{slug}/index.html` directly into this repo. One paste is special‑cased: `type: "pgp"` renders a fingerprint + a "copy key" button instead of plain text.
+Each paste page is a **thin shell**: its `<title>`, description, Open Graph tags and the paste content are baked into the HTML, so it's complete for crawlers, link previews and visitors without JavaScript. The shared `paste.js` then enhances it:
+- clickable links, and emails as `mailto:`;
+- **copy**, **download** (`.txt`, or `.asc` for keys), a **wrap** toggle and native **share**;
+- a PT/EN UI;
+- a refresh from `pastes.json`, in case the file was edited by hand after the shell was generated.
 
 ---
 
 ## Architecture
 
-- **Host:** Cloudflare Pages, static files from the repo root. Push to `main` → auto‑deploy.
-- **Routing:** folder‑based. `paste.lucafchala.com/camera-gear/` serves `camera-gear/index.html`. Cloudflare's directory handling covers routes natively; `_redirects` only patches edge cases (e.g. the accented alias `/a-máscara` → `/a-mascara`).
-- **Data:** one `pastes.json` is the source of truth for every paste; every page fetches it at runtime.
-- **Caching:** `_headers` serves `pastes.json` with `Access-Control-Allow-Origin: *` (so other sites, like `dash`, can read it cross‑origin) and `Cache-Control: public, max-age=60`. A service worker (`sw.js`, cache `paste-v2`) precaches the shell and uses stale‑while‑revalidate.
+- **Host:** Cloudflare Pages, static files from the repo root; push to `main` → deploy.
+- **Routing:** folder-based — `camera-gear/index.html` serves `/camera-gear/`. `_redirects` only patches edge cases (the accented alias `/a-máscara` → `/a-mascara`).
+- **Data:** `pastes.json` is the source of truth. It's served with `Access-Control-Allow-Origin: *` (the dash and the status monitor read it) and `Cache-Control: max-age=60`.
+- **Scripts:** all external, from `'self'`, with no inline scripts or handlers anywhere:
+  - `theme.js` — theme + language bootstrap, synchronous in `<head>`, shared across the ecosystem via the `lf_theme` / `lf_lang` cookies;
+  - `paste.js` — paste pages;
+  - `list.js` — the index.
+- **Styles:** `paste.css`, shared by every page. Fonts are self-hosted in `/fonts`.
+- **Service worker** (`sw.js`, cache `paste-v4`): network-first for `pastes.json` and page navigations, so an edit shows up on the next visit; stale-while-revalidate for static assets; never caches redirected or failed responses.
 - **No backend, no env vars, no secrets.**
 
-## How a paste is stored
-
-`pastes.json` shape:
+## `pastes.json`
 
 ```json
 {
@@ -42,6 +52,9 @@ Part of the [lucafchala.com ecosystem](https://github.com/lucafchala/lucafchala.
     {
       "slug": "pgp",
       "subtitle": "PUBLIC KEY",
+      "description": "Chave PGP pública",
+      "description_en": "Public PGP key",
+      "lang": "en",
       "type": "pgp",
       "fingerprint": "48E7 3F6F A287 1E7B 86EF  EA64 8EC4 329A 369B 7B33",
       "content": "-----BEGIN PGP PUBLIC KEY BLOCK-----\n…"
@@ -52,74 +65,58 @@ Part of the [lucafchala.com ecosystem](https://github.com/lucafchala/lucafchala.
 
 | Field | Meaning |
 |---|---|
-| `slug` | URL path and title (`/<slug>/`) |
-| `subtitle` | Small label shown on the `.rule` divider |
-| `description` / `description_en` | Used on the index list (EN falls back to PT) |
-| `lang` | `pt` or `en`; sets `<html lang>` on the paste page |
-| `type` | omitted/`text` → rendered as a `<pre>` with URLs auto‑linked; `pgp` → fingerprint + UID + copy‑key button |
-| `fingerprint` | PGP key fingerprint (only for `type: "pgp"`) |
-| `content` | The paste body (`\n` for line breaks) |
+| `slug` | URL path and heading (`/<slug>/`) |
+| `subtitle` | Label on the `.rule` divider |
+| `description` / `description_en` | Index list and `<meta name="description">` (EN falls back to PT) |
+| `lang` | `pt` or `en` — the content's language (`lang` attribute on the content) |
+| `type` | omitted → text with auto-linked URLs/emails; `pgp` → fingerprint, copy key, download `.asc`, link to keys.lucafchala.com |
+| `fingerprint` | PGP fingerprint (only for `type: "pgp"`) |
 
-The render logic (`renderText` / `renderPgp`) lives inline in each paste page; `text` pastes escape HTML and turn `https://…` into links, `pgp` pastes show metadata and a clipboard button.
+## Pages
 
----
+| Path | Kind | Notes |
+|---|---|---|
+| `/` | hand-owned | `index.html` + `list.js`: bilingual list with a live filter (`/` focuses it) |
+| `/<slug>/` for `a-mascara`, `camera-gear`, `e-mail-me`, `pgp` | **generated by dash** (`genPasteShell`) | Carry the `<!-- dash:paste-shell v2 … -->` marker. Don't hand-edit — use "regenerar páginas" in the dash |
+| `/nirvana-e-a-cultura-do-ultrarromantismo/`, `/vela_f5-2024/` | **hand-built** | Custom layout (notice box + link rows). The dash never overwrites them; their text is edited here, not in `pastes.json` |
+| `/cloudspot_deprecation/` | hand-built, not a paste | Target of the old Cloudspot links: points to fotos.lucafchala.com, support email and Instagram |
 
-## Prerequisites
+`pgp` is the page the signed statement on proof.lucafchala.com links to. It shows the **complete** key; the previous hand-built copy was truncated and failed `gpg --import`. The canonical key page is [keys.lucafchala.com](https://keys.lucafchala.com).
 
-- A text editor and `git` for manual edits.
-- (Optional) a static server for local preview — `python3 -m http.server`, `npx serve`, or Live Server. Serve from the repo root so `/pastes.json` resolves.
-- To add/edit pastes the supported way: the [`dash`](https://github.com/lucafchala/dash.lucafchala.com) control panel with a GitHub PAT configured.
+## Adding or editing a paste
 
-No accounts or environment variables are needed to run or deploy this repo.
+**In the dash** (normal path): Pastes → `+ novo` or `editar` → save. The dash writes `pastes.json`, the shell page and `sitemap.xml`, skipping unchanged files.
 
-## Install & deploy
+**By hand** (only when the dash isn't available):
+1. Add the entry to `pastes.json`.
+2. Create `<slug>/index.html`. Copy an existing shell and change the slug, title, description, canonical URL, `data-slug`, `data-type`, `lang` and the escaped content in `<pre id="paste-body">`.
+3. Add `<url><loc>https://paste.lucafchala.com/<slug>/</loc></url>` to `sitemap.xml`.
 
-```bash
-git clone https://github.com/lucafchala/paste.lucafchala.com.git
-cd paste.lucafchala.com
-python3 -m http.server 8000      # http://localhost:8000
-# edit pastes.json (and add a {slug}/ folder for new pastes), then:
-git push origin main             # Cloudflare Pages deploys automatically
-```
+CI tells you if any of these are out of sync. Pressing "regenerar páginas" in the dash later rewrites the shell cleanly.
 
-### Adding a paste by hand (if not using `dash`)
+## CI (`.github/workflows/checks.yml`)
 
-1. Append an entry to `pastes.json`.
-2. Create `‹slug›/index.html` as a copy of [`_paste-template.html`](./_paste-template.html) (the same self‑contained page every paste uses — it reads the slug from the URL).
-3. Commit and push.
-
-> The supported path is to do this in `dash`, which writes `pastes.json` and the new `{slug}/index.html` for you.
-
----
+- JSON validity, weak-escaper grep, `_headers` present, `node --check` on every JS file.
+- **No inline scripts or `on*=` handlers** in any page (the CSP is `script-src 'self'`).
+- **In sync:** every paste has a page. Generated pages carry the shell marker, and their baked content equals `pastes.json`. No orphan folders. `sitemap.xml` lists every paste.
+- **PGP key:** the armor in `pastes.json` and on `/pgp/` is complete. The CRC24 checksum verifies, and the v4 fingerprint computed from the key bytes equals `48E73F6FA2871E7B86EFEA648EC4329A369B7B33` and the `fingerprint` field.
 
 ## File structure
 
 ```
-.
-├── index.html               # Bilingual index — fetches pastes.json, lists all pastes
-├── pastes.json              # Source of truth for every paste (content + metadata)
-├── _paste-template.html     # The template each {slug}/index.html is cloned from
-├── _redirects               # Cloudflare Pages edge-case routes (e.g. /a-máscara → /a-mascara)
-├── _headers                 # CORS + cache headers for /pastes.json
-├── sw.js                    # Service worker (cache "paste-v2", stale-while-revalidate)
-├── icon.svg                 # Site icon
-└── ‹slug›/index.html        # One folder per paste — a-mascara/, camera-gear/, e-mail-me/,
-                             #   nirvana-e-a-cultura-do-ultrarromantismo/, vela_f5-2024/, pgp/,
-                             #   cloudspot_deprecation/, teste/  (each is the cloned template)
+index.html            # paste list (hand-owned)
+list.js               # index behaviour
+paste.js              # paste page behaviour (render, copy, download, share, wrap, refresh)
+paste.css             # styles for every page
+theme.js              # theme + language bootstrap (shared lf_* cookies)
+pastes.json           # source of truth (written by dash)
+<slug>/index.html     # one page per paste (generated shells or hand-built)
+cloudspot_deprecation/index.html
+sitemap.xml           # generated by dash
+sw.js                 # service worker
+_headers, _redirects, robots.txt, icon.svg, fonts/
 ```
-
-`cloudspot_deprecation/` is a notice page that several deprecated event galleries in the PURL list redirect to.
-
----
-
-## Design
-
-Uses the shared ecosystem design system — dark `#0d0c0a` / amber `#c08030`, **Cormorant Garamond** (paste titles) + **JetBrains Mono** (paste bodies, in a `white-space: pre-wrap` block), the grain overlay, the `rise` animation, and the `.rule` divider. Paste pages are PT/EN aware via each paste's `lang`.
-
-➡️ **Canonical tokens, fonts, and components:** [lucafchala.com → Design System](https://github.com/lucafchala/lucafchala.com#design-system). Linked, not duplicated, so the network stays consistent.
-
----
 
 ## Status
 
-**In production.** Content is managed through `dash`; treat `pastes.json` and the per‑slug folders as generated unless you're deliberately editing by hand.
+**In production.**

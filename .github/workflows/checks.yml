@@ -3,6 +3,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -25,3 +28,95 @@ jobs:
 
       - name: Security headers file present
         run: test -f _headers
+
+      - name: JS syntax
+        run: for f in *.js; do node --check "$f" || exit 1; done
+
+      - name: No inline scripts or handlers (CSP is script-src 'self')
+        run: |
+          python3 - <<'PY'
+          import re, os, sys
+          bad = []
+          for root, dirs, files in os.walk('.'):
+              dirs[:] = [d for d in dirs if d not in ('.git', 'node_modules')]
+              for f in files:
+                  if not f.endswith('.html'): continue
+                  p = os.path.join(root, f); html = open(p, encoding='utf-8').read()
+                  for m in re.finditer(r'<script\b([^>]*)>(.*?)</script>', html, re.S):
+                      if 'src=' not in m.group(1) and 'ld+json' not in m.group(1) and m.group(2).strip():
+                          bad.append(f'{p}: inline <script>')
+                  bad += [f'{p}: inline handler {h}' for h in re.findall(r'\s(on[a-z]+)=', html)]
+          if bad: print('\n'.join(bad)); sys.exit(1)
+          print('No inline scripts or handlers.')
+          PY
+
+      - name: Pastes, pages and sitemap are in sync
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, html, re
+          # Folders that are not pastes, and pastes with a hand-built page the dash never overwrites.
+          NOT_PASTES = {'cloudspot_deprecation', 'fonts', '.github'}
+          HAND_BUILT = {'nirvana-e-a-cultura-do-ultrarromantismo', 'vela_f5-2024'}
+          pastes = json.load(open('pastes.json', encoding='utf-8'))['pastes']
+          slugs = [p['slug'] for p in pastes]
+          errs = []
+          if len(slugs) != len(set(slugs)): errs.append('duplicate slugs in pastes.json')
+          for p in pastes:
+              f = f"{p['slug']}/index.html"
+              if not os.path.isfile(f): errs.append(f'missing page {f}'); continue
+              page = open(f, encoding='utf-8').read()
+              if p['slug'] in HAND_BUILT: continue
+              if 'dash:paste-shell' not in page: errs.append(f'{f} is not a dash shell (add it to HAND_BUILT if hand-made on purpose)')
+              m = re.search(r'<pre class="paste-pre" id="paste-body">(.*?)</pre>', page, re.S)
+              if not m or html.unescape(m.group(1)) != p.get('content', ''):
+                  errs.append(f'{f}: baked content differs from pastes.json — use "regenerate pages" in the dash')
+          for d in sorted(os.listdir('.')):
+              if os.path.isfile(os.path.join(d, 'index.html')) and d not in slugs and d not in NOT_PASTES:
+                  errs.append(f'orphan page {d}/index.html (not in pastes.json)')
+          sm = open('sitemap.xml', encoding='utf-8').read()
+          errs += [f'sitemap.xml lacks /{s}/' for s in slugs if f'/{s}/</loc>' not in sm]
+          if errs: print('\n'.join(errs)); sys.exit(1)
+          print(f'{len(slugs)} pastes, pages and sitemap in sync.')
+          PY
+
+      - name: PGP key is complete and matches its fingerprint
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, re, sys, html
+          EXPECTED = '48E73F6FA2871E7B86EFEA648EC4329A369B7B33'
+          def crc24(data):
+              crc = 0xB704CE
+              for b in data:
+                  crc ^= b << 16
+                  for _ in range(8):
+                      crc <<= 1
+                      if crc & 0x1000000: crc ^= 0x1864CFB
+              return crc & 0xFFFFFF
+          def fingerprint(armor):
+              m = re.search(r'-----BEGIN PGP PUBLIC KEY BLOCK-----\n(?:[^\n]+: [^\n]*\n)*\n(.*?)\n=([A-Za-z0-9+/]{4})\n-----END PGP PUBLIC KEY BLOCK-----', armor, re.S)
+              if not m: raise ValueError('armor incomplete (missing checksum or END line)')
+              data = base64.b64decode(''.join(m.group(1).split()), validate=True)
+              if crc24(data).to_bytes(3, 'big') != base64.b64decode(m.group(2)): raise ValueError('CRC24 checksum mismatch — key is truncated or corrupted')
+              b0 = data[0]
+              if b0 & 0x40:
+                  tag, l0 = b0 & 0x3F, data[1]
+                  if l0 < 192: ln, off = l0, 2
+                  elif l0 < 224: ln, off = ((l0 - 192) << 8) + data[2] + 192, 3
+                  else: ln, off = int.from_bytes(data[2:6], 'big'), 6
+              else:
+                  tag, lt = (b0 >> 2) & 0xF, b0 & 3
+                  ln, off = {0: (data[1], 2), 1: (int.from_bytes(data[1:3], 'big'), 3), 2: (int.from_bytes(data[1:5], 'big'), 5)}[lt]
+              if tag != 6: raise ValueError('first packet is not a public key')
+              body = data[off:off + ln]
+              return hashlib.sha1(b'\x99' + len(body).to_bytes(2, 'big') + body).hexdigest().upper()
+          errs = []
+          p = next(p for p in json.load(open('pastes.json', encoding='utf-8'))['pastes'] if p['slug'] == 'pgp')
+          for label, armor in [('pastes.json', p['content']), ('pgp/index.html', html.unescape(re.search(r'id="paste-body">(.*?)</pre>', open('pgp/index.html', encoding='utf-8').read(), re.S).group(1)))]:
+              try:
+                  fp = fingerprint(armor)
+                  if fp != EXPECTED: errs.append(f'{label}: fingerprint {fp} != {EXPECTED}')
+              except Exception as e: errs.append(f'{label}: {e}')
+          if p.get('fingerprint', '').replace(' ', '').upper() != EXPECTED: errs.append('pastes.json: "fingerprint" field does not match the key')
+          if errs: print('\n'.join(errs)); sys.exit(1)
+          print('PGP key complete, checksum OK, fingerprint', EXPECTED)
+          PY
