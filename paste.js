@@ -29,7 +29,7 @@
     var pre = document.getElementById('paste-body');
     if (!slug || !pre) return;
 
-    var type = body.getAttribute('data-type') === 'pgp' ? 'pgp' : 'text';
+    var type = ['pgp', 'links'].indexOf(body.getAttribute('data-type')) !== -1 ? body.getAttribute('data-type') : 'text';
     var raw = pre.textContent;
     var wrapped = true;
 
@@ -51,6 +51,37 @@
             last = m.index + m[0].length;
         }
         return out + esc(text.slice(last));
+    }
+
+    /* type "links": a notice + link buttons, for pages like the school video
+       projects. Rule (the dash preview uses the same one):
+         - blocks are separated by a blank line;
+         - a block whose last line is a URL → a link row, the lines above it
+           are its caption (a trailing ":" is dropped);
+         - a title line followed only by "- item" lines → a members list;
+         - the first other block → the notice; later ones → plain text. */
+    function renderLinks(text) {
+        var html = '', noticeDone = false;
+        text.split(/\n[ \t]*\n/).forEach(function (block) {
+            var lines = block.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+            if (!lines.length) return;
+            var last = lines[lines.length - 1];
+            if (/^https?:\/\/\S+$/.test(last)) {
+                var cap = lines.slice(0, -1).join(' ').replace(/:\s*$/, '');
+                html += '<div class="block">' + (cap ? '<p>' + linkify(cap) + '</p>' : '') +
+                    '<a class="link-row" href="' + esc(last) + '" target="_blank" rel="noopener noreferrer"><span class="link-url">' +
+                    esc(last.replace(/^https?:\/\//, '')) + '</span><span class="link-arr" aria-hidden="true">↗</span></a></div>';
+            } else if (lines.length > 1 && lines.slice(1).every(function (l) { return /^[-•*]\s+/.test(l); })) {
+                html += '<div class="members"><span class="members-title">' + esc(lines[0].replace(/:\s*$/, '')) + '</span>' +
+                    lines.slice(1).map(function (l) { return '<span>' + esc(l.replace(/^[-•*]\s+/, '')) + '</span>'; }).join('') + '</div>';
+            } else if (!noticeDone) {
+                noticeDone = true;
+                html += '<div class="notice">' + linkify(lines.join('\n')) + '</div>';
+            } else {
+                html += '<p class="links-text">' + linkify(lines.join('\n')) + '</p>';
+            }
+        });
+        return html;
     }
 
     function copyText(text) {
@@ -123,7 +154,14 @@
         actions.parentNode.insertBefore(note, actions);
     }
 
+    var view = null;
     function render() {
+        if (type === 'links') {
+            /* The <pre> keeps the raw text (copy/download, no-JS fallback). */
+            if (!view) { view = document.createElement('div'); view.className = 'links-view'; pre.parentNode.insertBefore(view, pre.nextSibling); pre.hidden = true; }
+            view.innerHTML = renderLinks(raw);
+            return;
+        }
         pre.innerHTML = type === 'text' ? linkify(raw) : esc(raw);
     }
     render();

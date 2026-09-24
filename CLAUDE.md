@@ -9,10 +9,15 @@ Static pastebin, no build step, Cloudflare Pages (push to `main` deploys). Read 
 | `pastes.json` | **dash** (`genPastesJson`) | Source of truth. Hand edits are fine but keep the shape; dash reformats on its next save |
 | `<slug>/index.html` with the `dash:paste-shell` marker | **dash** (`genPasteShell`) | Don't hand-edit. Change the generator in the dash repo, then "regenerar páginas" |
 | `sitemap.xml` | **dash** (`genPasteSitemap`) | Regenerated on every paste save |
-| `nirvana-…/`, `vela_f5-2024/`, `cloudspot_deprecation/` | hand-built | Custom layouts; the dash never touches pages without the marker. Listed in `HAND_BUILT` / `NOT_PASTES` in CI |
+| `cloudspot_deprecation/` | hand-built | Not a paste; the dash never touches pages without the marker. Listed in `NOT_PASTES` in CI. (`nirvana-…/` and `vela_f5-2024/` became generated `type: "links"` shells in paste#10) |
 | `index.html`, `list.js`, `paste.js`, `paste.css`, `theme.js`, `sw.js`, `_headers`, `_redirects`, `robots.txt` | this repo | Edit here |
 
-Rendering behaviour belongs in `paste.js` / `paste.css`, not in the shells. That way a change applies to every paste without regenerating pages.
+Rendering behaviour belongs in `paste.js` / `paste.css`, not in the shells. Types:
+- `text`;
+- `pgp`;
+- `links` — `renderLinks()`: blank-line blocks; last line a URL → link row; "title + `- item`s" → members; first other block → notice. Keep the dash's `previewLinks()` in sync.
+
+Shells keep every piece of content inside a landmark (`<nav class="controls">`, rule inside `<header>`). That way a change applies to every paste without regenerating pages.
 
 ## Rules
 
