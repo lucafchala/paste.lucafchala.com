@@ -56,7 +56,7 @@ jobs:
           import json, os, sys, html, re
           # Folders that are not pastes, and pastes with a hand-built page the dash never overwrites.
           NOT_PASTES = {'cloudspot_deprecation', 'fonts', '.github'}
-          HAND_BUILT = {'nirvana-e-a-cultura-do-ultrarromantismo', 'vela_f5-2024'}
+          HAND_BUILT = set()  # none left: the video-project pages are type "links" shells now (paste#10)
           pastes = json.load(open('pastes.json', encoding='utf-8'))['pastes']
           slugs = [p['slug'] for p in pastes]
           errs = []

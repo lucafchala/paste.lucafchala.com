@@ -4,7 +4,7 @@
      fallback.
    - Static assets (css/js/fonts/icon): stale-while-revalidate.
    Redirected, opaque or non-2xx responses are never cached. */
-const CACHE = 'paste-v4';
+const CACHE = 'paste-v5';
 const PRECACHE = [
     '/', '/paste.css', '/paste.js', '/list.js', '/theme.js', '/icon.svg',
     '/fonts/cormorant-garamond-latin.woff2', '/fonts/cormorant-garamond-italic-latin.woff2', '/fonts/jetbrains-mono-latin.woff2',

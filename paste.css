@@ -50,6 +50,10 @@ header { margin-bottom: 40px; animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1)
 .micro { color: var(--muted); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
 .rule { display: flex; align-items: center; gap: 16px; margin: 32px 0; color: var(--muted); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
 .rule::before, .rule::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+/* Shells keep the rule inside <header> (every piece of content in a landmark);
+   these keep the spacing it had as a sibling: 40px above, 32px below. */
+header:has(> .rule) { margin-bottom: 0; }
+header > .rule { margin: 40px 0 32px; }
 
 /* ── Paste page ── */
 .content { animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
@@ -91,3 +95,16 @@ header { margin-bottom: 40px; animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1)
 @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 @media (max-width: 540px) { body { padding: 28px 18px 52px; } }
+
+/* type "links" (paste.js renderLinks) */
+.links-view { margin-top: 20px; }
+.links-view .notice { border-left: 3px solid var(--accent); padding: 12px 18px; background: var(--ctrl-bg); border-radius: 0 3px 3px 0; margin-bottom: 28px; font-size: 13px; font-weight: 500; color: var(--accent); white-space: pre-line; }
+.links-view .block { margin-bottom: 24px; }
+.links-view .block p, .links-view .links-text { font-size: 13px; color: var(--muted); margin-bottom: 8px; white-space: pre-line; }
+.links-view .link-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 3px; background: var(--ctrl-bg); text-decoration: none; transition: border-color 0.15s, background 0.15s; }
+.links-view .link-row:hover { border-color: var(--accent); }
+.links-view .link-url { font-size: 12px; color: var(--accent); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.links-view .link-arr { color: var(--accent); font-size: 13px; flex-shrink: 0; }
+.links-view .members { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+.links-view .members span { display: block; padding: 4px 0; }
+.links-view .members .members-title { color: var(--accent); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
