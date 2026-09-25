@@ -40,7 +40,7 @@
       "description": "Contato por e-mail",
       "description_en": "Contact by e-mail",
       "lang": "en",
-      "content": "You can contact me via any of the addresses below — they all redirect to the same inbox.\n\nluca@lucafchala.com\ntucas@fastmail.com\nlfchala4@gmail.com\n\nFeel free to use my PGP key: https://paste.lucafchala.com/pgp"
+      "content": "You can contact me at the address below.\n\nluca@lucafchala.com\n\nFeel free to use my PGP key: https://paste.lucafchala.com/pgp"
     },
     {
       "slug": "pgp",
