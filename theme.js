@@ -25,7 +25,7 @@
 
     function paintThemeColor() {
         var m = document.querySelector('meta[name="theme-color"]');
-        if (m) m.content = P.theme === 'light' ? '#f4efe6' : '#0d0c0a';
+        if (m) m.content = P.theme === 'light' ? '#f0ece8' : '#0a0a0a';
     }
 
     var P = window.lfPrefs = {
